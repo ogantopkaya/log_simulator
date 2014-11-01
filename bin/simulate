@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+
+filepath =''
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: Debug Socket [options]"
+
+  opts.on('-p' , '--path filePath',String,'Log File Path') do |path|
+    filepath = path
+  end
+
+  opts.on_tail('-h', '--help', 'Show this message') { puts opts; exit }
+
+end.parse!(ARGV)
+
+LogSimulator::PlusLogSimulator.start(filepath)
+
