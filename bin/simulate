@@ -5,21 +5,24 @@ require 'log_simulator'
 
 timescale = 1.0
 
-OptionParser.new do |opts|
-  opts.banner = "Usage: Debug Socket [options]"
+opts = OptionParser.new do |opts|
+  opts.banner = "Usage: simulate [logfile path] [options]"
 
-  opts.on('-t time',Float,'timescale') do |time|
+  opts.on('-t time',Float,'timescale. Default is 1.0') do |time|
     timescale = time
   end
 
   opts.on_tail('-h', '--help', 'Show this message') { puts opts; exit }
-end.parse!(ARGV)
+end
+
+opts.parse!(ARGV)
 
 filepath = ARGV.pop(ARGV.count)[0]
 if filepath
   LogSimulator::PlusLogSimulator.start(filepath,timescale)
 else
-  puts 'Specify file path'
+  puts opts.help
+  exit 1
 end
 
 
