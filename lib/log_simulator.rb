@@ -2,7 +2,7 @@
 module LogSimulator
   class PlusLogSimulator
 
-    def self.start(filepath)
+    def self.start(filepath,timescale)
       begin
         socket = TCPSocket.new 'localhost',7658
       rescue Exception => _
@@ -12,9 +12,12 @@ module LogSimulator
       path = File.expand_path(filepath)
       puts "Opening log file at path: " + path
 
-      time = 0
-      timescale = 1
+      if !File.exist? path
+        puts 'No such file at path '+ path
+        return
+      end
 
+      time = 0
       File.open(path,'r+:utf-8') do |file|
         file.each_line do |line|
           timestamp_parse(line) do |_time,message|

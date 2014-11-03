@@ -3,18 +3,23 @@
 require 'optparse'
 require 'log_simulator'
 
-filepath =''
+timescale = 1.0
 
 OptionParser.new do |opts|
   opts.banner = "Usage: Debug Socket [options]"
 
-  opts.on('-p' , '--path filePath',String,'Log File Path') do |path|
-    filepath = path
+  opts.on('-t time',Float,'timescale') do |time|
+    timescale = time
   end
 
   opts.on_tail('-h', '--help', 'Show this message') { puts opts; exit }
-
 end.parse!(ARGV)
 
-LogSimulator::PlusLogSimulator.start(filepath)
+filepath = ARGV.pop(ARGV.count)[0]
+if filepath
+  LogSimulator::PlusLogSimulator.start(filepath,timescale)
+else
+  puts 'Specify file path'
+end
+
 
