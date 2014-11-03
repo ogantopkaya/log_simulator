@@ -17,8 +17,7 @@ module LogSimulator
 
       File.open(path,'r+:utf-8') do |file|
         file.each_line do |line|
-          line.scan(/N\|(\d+)\|RECEIVE << (.*)/) do |timeStr,message|
-            _time = timeStr.to_i
+          timestamp_parse(line) do |_time,message|
             if time != 0
               sleep (_time - time) * timescale
             end
@@ -30,7 +29,12 @@ module LogSimulator
           end
         end
       end
+    end
 
+    def self.timestamp_parse (line)
+      line.scan(/N\|(\d+)\|RECEIVE << (.*)/) do |timeStr,message|
+        yield timeStr.to_i,message
+      end
     end
 
   end
