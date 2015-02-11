@@ -27,6 +27,30 @@ module LogSimulator
   end
 
   class Resolver
+    def self.select_target(scan_time)
+      self.resolve_service(scan_time) do |found_targets|
+        if found_targets.count <= 0
+          puts 'no possible target found!'
+        elsif found_targets.count == 1
+          target = found_targets[0]
+          yield target
+        else
+          puts 'Which one to connect?'
+          found_targets.each_with_index do |target,index|
+            puts "#{index+1}. #{target.name} - #{target.target_name}: #{target.port}"
+          end
+
+          puts 'Select: '
+          selection = gets.chomp.to_i - 1
+          while(selection < 0 || selection >= found_targets.count)
+            puts "Select between #{0}-#{found_targets.count}"
+            selection = gets.chomp.to_i - 1
+          end
+          yield found_targets[selection]
+        end
+      end
+    end
+
     def self.resolve_service(scan_time)
       browser = DNSSD::Service.new
       service_name = '_debugConnection._tcp'

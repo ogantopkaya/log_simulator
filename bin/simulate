@@ -1,22 +1,17 @@
 #!/usr/bin/env ruby
 
 require 'optparse'
-require 'log_simulator'
+require 'peak_log_simulator'
 require 'resolve'
+require 'socket_connetion'
 
-timescale = 1.0
-free_option = false
-filepath = ''
+options={:filepath => nil ,:timescale => 1.0}
 
 opts = OptionParser.new do |opts|
   opts.banner = "Usage: simulate [logfile path] [options]"
 
-  opts.on('-f', '--free', 'Open connection without a file') do
-    free_option = true
-  end
-
   opts.on('-t time',Float,'timescale. Default is 1.0') do |time|
-    timescale = time
+    options[:timescale] = time
   end
 
   opts.on_tail('-h', '--help', 'Show this message') { puts opts; exit }
@@ -24,54 +19,33 @@ end
 
 opts.parse!(ARGV)
 
+# empty option set
 # if STDIN.tty?
 #   puts opts.help
 #   exit 1
 # end
 
-# if(opts.count == 0)
-#   puts opts.help
-#   exit 1
-# end
-
-# if(!free_option)
-#   filepath = ARGV.pop(ARGV.count)[0]
-# end
-
-# if no input-file or output-file is given, spit out the help
-if ARGV.empty?
-  puts opts
-  exit(-1)
-else
+unless ARGV.empty?
+  options[:filepath] = ARGV.pop(ARGV.count)[0]
 end
 
+LogSimulator::Resolver.select_target(2.0) do |target|
+  socket_connection = LogSimulator::SocketConnetion.new(target.target_name,target.port)
 
-# Parse the command-line. Remember there are two forms # of the parse method. The 'parse' method simply parses # ARGV, while the 'parse!' method parses ARGV and removes # any options found there, as well as any parameters for # the options. What's left is the list of files to resize. optparse.parse!  puts "Being verbose" if options[:verbose] puts "Being quick" if options[:quick] puts "Logging to file #{options[:logfile]}" if options[:logfile]
-#
-# ARGV.each do|f|
-# puts "Resizing image #{f}..."
-# sleep 0.5
-# end
-
-# LogSimulator::Resolver.resolve_service(2.0) do |found_targets|
-#   if found_targets.count <= 0
-#     puts 'no possible target found!'
-#   elsif found_targets.count == 1
-#     target = found_targets[0]
-#     puts "Connecting to  #{target.target_name}:#{target.port}"
-#   else
-#     puts 'Which one to connect?'
-#     found_targets.each_with_index do |target,index|
-#       puts "#{index+1}. #{target.name} - #{target.target_name}: #{target.port}"
-#     end
-#   end
-# end
-
-
-# if filepath
-#   LogSimulator::PlusLogSimulator.start(filepath,timescale)
-# else
-#end
-
-
+  unless options[:filepath].nil?
+    LogSimulator::PeakLogSimulator.start(socket_connection.socket,options[:filepath],options[:timescale]) do |success|
+      while true #TODO: make it DRY
+        print '>'
+        message = gets.chomp
+        socket_connection.socket.puts message
+      end
+    end
+  else
+    while true
+      print '>'
+      message = gets.chomp
+      socket_connection.socket.puts message
+    end
+  end
+end
 
