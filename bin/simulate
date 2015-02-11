@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'log_simulator/version'
 require 'optparse'
 require 'peak_log_simulator'
 require 'resolve'
