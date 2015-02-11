@@ -14,6 +14,8 @@ opts = OptionParser.new do |opts|
     options[:timescale] = time
   end
 
+  opts.on('-v','--version','Version') {puts LogSimulator::VERSION; exit}
+
   opts.on_tail('-h', '--help', 'Show this message') { puts opts; exit }
 end
 
@@ -30,6 +32,7 @@ unless ARGV.empty?
 end
 
 LogSimulator::Resolver.select_target(2.0) do |target|
+  puts "Connection to #{target.name} - #{target.target_name} :#{target.port}"
   socket_connection = LogSimulator::SocketConnetion.new(target.target_name,target.port)
 
   unless options[:filepath].nil?
