@@ -6,13 +6,17 @@ require 'peak_log_simulator'
 require 'resolve'
 require 'socket_connetion'
 
-options={:filepath => nil ,:timescale => 1.0}
+options={:filepath => nil ,:timescale => 1.0, :pretty => false}
 
 opts = OptionParser.new do |opts|
   opts.banner = "Usage: simulate [logfile path] [options]"
 
   opts.on('-t time',Float,'timescale. Default is 1.0') do |time|
     options[:timescale] = time
+  end
+
+  opts.on('-p','--pretty','Pretty Log Messages') do
+    options[:pretty] = true
   end
 
   opts.on('-v','--version','Version') {puts LogSimulator::VERSION; exit}
@@ -37,7 +41,7 @@ LogSimulator::Resolver.select_target(2.0) do |target|
   socket_connection = LogSimulator::SocketConnetion.new(target.target_name,target.port)
 
   unless options[:filepath].nil?
-    LogSimulator::PeakLogSimulator.start(socket_connection.socket,options[:filepath],options[:timescale]) do |success|
+    LogSimulator::PeakLogSimulator.start(socket_connection.socket,options[:filepath],options[:timescale],options[:pretty]) do |success|
       while true #TODO: make it DRY
         print '>'
         message = gets.chomp

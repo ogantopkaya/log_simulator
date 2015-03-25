@@ -1,9 +1,11 @@
 require 'socket'
+require 'date'
+require 'json-prettyprint'
 
 module LogSimulator
   class PeakLogSimulator
 
-    def self.start(socket,filepath,timescale)
+    def self.start(socket,filepath,timescale,pretty)
       path = File.expand_path(filepath)
       puts 'Opening log file at path: ' + path
 
@@ -23,7 +25,7 @@ module LogSimulator
             if socket != nil
               socket.puts message
             end
-            puts '<' + message
+            puts '<' + (pretty ? (JSON::PrettyPrint.prettify(message)) : message)
             time = _time
           end
         end
@@ -33,8 +35,13 @@ module LogSimulator
     end
 
     def self.timestamp_parse (line)
-      line.scan(/N\|(\d+)\|RECEIVE << (.*)/) do |timeStr,message|
-        yield timeStr.to_i,message
+      line.scan(/N\|(.+)\|RECEIVE << (.*)/) do |timestamp,message|
+        begin
+          date = DateTime.parse(timestamp)
+          yield date.to_time.utc.to_i,message
+        rescue
+          yield timestamp.to_i,message
+        end
       end
     end
 
