@@ -35,6 +35,7 @@ module LogSimulator
     end
 
     def self.timestamp_parse (line)
+      line.encode!('UTF-8', :undef => :replace, :invalid => :replace, :replace => '') #Fixes for non-utf chars
       line.scan(/N\|(.+)\|RECEIVE << (.*)/) do |timestamp,message|
         begin
           date = DateTime.parse(timestamp)
